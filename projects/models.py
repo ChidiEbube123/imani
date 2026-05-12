@@ -62,12 +62,16 @@ class Project(models.Model):
 
 class ProjectMilestone(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='milestones')
+    order = models.IntegerField(default=1)
     title = models.CharField(max_length=200)
     description = models.TextField()
-    target_percentage = models.FloatField()  # e.g. 25% = first milestone
-    payment_percentage = models.FloatField()  # % of total budget unlocked at this milestone
+    target_percentage = models.FloatField()
+    payment_percentage = models.FloatField()
     achieved = models.BooleanField(default=False)
     achieved_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['order']
+
     def __str__(self):
-        return f"{self.project.title} - {self.title}"
+        return f"{self.project.title} — {self.title}"

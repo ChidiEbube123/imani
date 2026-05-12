@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.title }} — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between" style="flex-wrap:wrap;gap:1rem">
+  <div>
+    <div class="text-muted mb-2"><a href="{% url 'public_project_list' %}">Projects</a> / {{ project.title }}</div>
+    <h1 style="font-size:1.3rem">{{ project.title }}</h1>
+    <p>&#128205; {{ project.location_name }} &mdash; {{ project.contractor.company }}</p>
+  </div>
+  {% if user.is_authenticated and project.status == 'active' %}
+  <a href="{% url 'citizen_upload' project.pk %}" class="btn btn-primary">&#128247; Submit Evidence</a>
+  {% elif not user.is_authenticated %}
+  <a href="{% url 'citizen_login' %}?next={% url 'citizen_upload' project.pk %}" class="btn btn-primary">Login to Submit Evidence</a>
+  {% endif %}
+</div>
+
+<div class="grid grid-2 mb-2">
+  <div class="card">
+    <div style="margin-bottom:1rem">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.4rem">
+        <span style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">AI-Verified Completion</span>
+        <span class="mono" style="font-size:1.6rem;font-weight:700;color:var(--accent)">{{ project.completion_percentage|floatformat:1 }}%</span>
+      </div>
+      <div class="progress-wrap" style="height:14px"><div class="progress-bar green" style="width:{{ project.completion_percentage }}%"></div></div>
+    </div>
+    <div class="grid grid-2" style="gap:.75rem">
+      <div><div class="stat-label">Budget</div><div class="mono">&#8358;{{ project.total_budget|floatformat:0 }}</div></div>
+      <div><div class="stat-label">Released</div><div class="mono" style="color:var(--success)">&#8358;{{ project.amount_paid|floatformat:0 }}</div></div>
+      <div><div class="stat-label">Started</div><div class="mono">{{ project.start_date }}</div></div>
+      <div><div class="stat-label">Due</div><div class="mono">{{ project.expected_end_date }}</div></div>
+      <div><div class="stat-label">Type</div><span class="badge badge-blue">{{ project.get_project_type_display }}</span></div>
+      <div><div class="stat-label">Status</div>{% if project.status == 'active' %}<span class="badge badge-green">Active</span>{% elif project.status == 'completed' %}<span class="badge badge-blue">Completed</span>{% else %}<span class="badge badge-gray">{{ project.status }}</span>{% endif %}</div>
+    </div>
+    {% if project.description %}<div class="divider"></div><div style="font-size:.85rem;color:var(--muted);line-height:1.6">{{ project.description }}</div>{% endif %}
+  </div>
+
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Project Milestones</div>
+    {% for m in milestones %}
+    <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--border)">
+      <div style="width:22px;height:22px;border-radius:50%;background:{% if m.achieved %}var(--success){% elif project.completion_percentage >= m.target_percentage %}var(--warn){% else %}var(--surface2){% endif %};border:2px solid {% if m.achieved %}var(--success){% elif project.completion_percentage >= m.target_percentage %}var(--warn){% else %}var(--border){% endif %};flex-shrink:0;margin-top:.15rem;display:flex;align-items:center;justify-content:center;font-size:.6rem">{% if m.achieved %}&#10003;{% endif %}</div>
+      <div style="flex:1">
+        <div style="font-size:.84rem;font-weight:500">{{ m.title }}</div>
+        <div style="font-size:.73rem;color:var(--muted)">Target: {{ m.target_percentage }}% &mdash; Unlocks {{ m.payment_percentage }}% of budget</div>
+      </div>
+      {% if m.achieved %}<span class="badge badge-green">Done</span>{% elif project.completion_percentage >= m.target_percentage %}<span class="badge badge-yellow">Due</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="flex-between mb-2">
+    <h2 style="font-size:1rem;font-weight:600">Verified Evidence ({{ recent_evidence|length }} photos)</h2>
+    {% if user.is_authenticated and project.status == 'active' %}<a href="{% url 'citizen_upload' project.pk %}" class="btn btn-primary btn-sm">+ Add Your Photo</a>{% endif %}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.75rem">
+    {% for ev in recent_evidence %}
+    <div style="position:relative">
+      <img src="{{ ev.image.url }}" style="width:100%;height:120px;object-fit:cover;border-radius:8px">
+      <div style="position:absolute;top:.4rem;left:.4rem"><span class="badge {% if ev.source == 'satellite' %}badge-blue{% elif ev.source == 'camera_gov' %}badge-yellow{% else %}badge-teal{% endif %}" style="font-size:.6rem">{{ ev.get_source_display }}</span></div>
+      {% if ev.status == 'analyzed' and ev.analysis %}
+      <div style="position:absolute;bottom:.4rem;right:.4rem;background:rgba(0,0,0,.7);border-radius:4px;padding:.15rem .4rem;font-family:var(--mono);font-size:.68rem;color:var(--accent)">{{ ev.analysis.completion_score|floatformat:0 }}%</div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div style="grid-column:1/-1;color:var(--muted);padding:2rem;text-align:center">
+      No verified evidence yet.
+      {% if user.is_authenticated %}<a href="{% url 'citizen_upload' project.pk %}">Be the first to submit a photo</a>.{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% if not user.is_authenticated %}
+<div class="card mt-2" style="border-color:rgba(0,212,170,.25);background:rgba(0,212,170,.04);display:flex;align-items:center;gap:1.5rem;padding:1.5rem">
+  <div style="font-size:2rem">&#128247;</div>
+  <div style="flex:1"><div style="font-weight:600;margin-bottom:.25rem">Know this project site?</div><div class="text-muted">Register as a citizen and submit photos to help verify progress. Your contribution matters.</div></div>
+  <a href="{% url 'citizen_register' %}" class="btn btn-primary">Register Free</a>
+</div>
+{% endif %}
+{% endblock %}

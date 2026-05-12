@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}My Dashboard — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between">
+  <div>
+    <h1>Welcome, {{ user.get_full_name|default:user.username }}</h1>
+    <p>Your contributions help verify government project progress</p>
+  </div>
+  <a href="{% url 'public_project_list' %}" class="btn btn-primary">+ Submit Evidence</a>
+</div>
+
+<div class="grid grid-4 mb-2">
+  <div class="card stat">
+    <div class="stat-label">Total Submissions</div>
+    <div class="stat-value" style="color:var(--accent)">{{ profile.total_submissions }}</div>
+    <div class="stat-sub">Photos submitted</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-label">Accepted</div>
+    <div class="stat-value" style="color:var(--success)">{{ profile.accepted_submissions }}</div>
+    <div class="stat-sub">Used in analysis</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-label">Acceptance Rate</div>
+    <div class="stat-value" style="color:var(--accent2)">{{ profile.acceptance_rate }}%</div>
+    <div class="stat-sub">Quality score</div>
+  </div>
+  <div class="card stat">
+    <div class="stat-label">Status</div>
+    <div style="margin-top:.5rem">{% if profile.is_verified %}<span class="badge badge-green" style="font-size:.85rem">Verified Citizen</span>{% else %}<span class="badge badge-yellow" style="font-size:.85rem">Unverified</span>{% endif %}</div>
+    <div class="stat-sub">Account standing</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div class="flex-between mb-2"><h2 style="font-size:1rem;font-weight:600">My Recent Submissions</h2><a href="{% url 'citizen_profile' %}" class="btn btn-secondary btn-sm">View All</a></div>
+    {% for ev in submissions %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <img src="{{ ev.image.url }}" style="width:44px;height:44px;object-fit:cover;border-radius:6px;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><a href="{% url 'public_project_detail' ev.project.pk %}">{{ ev.project.title }}</a></div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ ev.uploaded_at|date:"M d, Y" }}</div>
+      </div>
+      <span class="badge {% if ev.status == 'analyzed' %}badge-green{% elif ev.status == 'rejected' %}badge-red{% else %}badge-yellow{% endif %}">{{ ev.status }}</span>
+    </div>
+    {% empty %}
+    <div class="text-muted" style="padding:1rem 0">No submissions yet. <a href="{% url 'public_project_list' %}">Find a project near you</a>.</div>
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="flex-between mb-2"><h2 style="font-size:1rem;font-weight:600">Active Projects — Submit Evidence</h2></div>
+    {% for p in active_projects %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-size:.85rem;font-weight:500"><a href="{% url 'public_project_detail' p.pk %}">{{ p.title }}</a></div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ p.location_name }} &mdash; {{ p.completion_percentage|floatformat:1 }}% complete</div>
+        <div class="progress-wrap mt-1" style="height:4px"><div class="progress-bar green" style="width:{{ p.completion_percentage }}%"></div></div>
+      </div>
+      <a href="{% url 'citizen_upload' p.pk %}" class="btn btn-primary btn-sm">Submit</a>
+    </div>
+    {% empty %}
+    <div class="text-muted" style="padding:1rem 0">No active projects found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

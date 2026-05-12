@@ -3,11 +3,25 @@ from django.contrib.auth.models import User
 from projects.models import Project
 
 
+class SiteCamera(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='cameras')
+    name = models.CharField(max_length=100)
+    snapshot_url = models.URLField(blank=True, help_text='HTTP URL for JPEG snapshot. Leave blank for RTSP.')
+    rtsp_url = models.CharField(max_length=300, blank=True, help_text='RTSP stream URL (production use)')
+    location_description = models.CharField(max_length=200, blank=True)
+    is_active = models.BooleanField(default=True)
+    last_capture = models.DateTimeField(null=True, blank=True)
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.project.title} — {self.name}"
+
+
 class MediaEvidence(models.Model):
     SOURCE_CHOICES = [
         ('satellite', 'Satellite Image'),
         ('camera_gov', 'Government Camera'),
-        ('camera_crowd', 'Crowdsourced Camera'),
+        ('camera_crowd', 'Crowdsourced'),
         ('drone', 'Drone Footage'),
         ('document', 'Document'),
     ]
@@ -22,7 +36,7 @@ class MediaEvidence(models.Model):
     source = models.CharField(max_length=30, choices=SOURCE_CHOICES)
     image = models.ImageField(upload_to='evidence/%Y/%m/')
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
-    uploader_name = models.CharField(max_length=100, blank=True)  # for crowdsourced
+    uploader_name = models.CharField(max_length=100, blank=True)
     uploader_phone = models.CharField(max_length=20, blank=True)
     gps_lat = models.FloatField(null=True, blank=True)
     gps_lng = models.FloatField(null=True, blank=True)
@@ -30,6 +44,9 @@ class MediaEvidence(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     notes = models.TextField(blank=True)
+    # moderation
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return f"{self.project.title} - {self.source} ({self.captured_at.date()})"
@@ -37,11 +54,11 @@ class MediaEvidence(models.Model):
 
 class AIAnalysisResult(models.Model):
     evidence = models.OneToOneField(MediaEvidence, on_delete=models.CASCADE, related_name='analysis')
-    raw_detections = models.JSONField(default=list)   # YOLO bounding boxes & labels
-    detected_elements = models.JSONField(default=dict) # structured construction elements
-    completion_score = models.FloatField()             # 0–100
-    confidence = models.FloatField()                   # model confidence 0–1
-    stage_scores = models.JSONField(default=dict)      # per-stage breakdown
+    raw_detections = models.JSONField(default=list)
+    detected_elements = models.JSONField(default=dict)
+    completion_score = models.FloatField()
+    confidence = models.FloatField()
+    stage_scores = models.JSONField(default=dict)
     analysis_notes = models.TextField(blank=True)
     analyzed_at = models.DateTimeField(auto_now_add=True)
     model_version = models.CharField(max_length=50, default='yolov3-construction-mvp')
@@ -51,7 +68,6 @@ class AIAnalysisResult(models.Model):
 
 
 class ProjectCompletionSnapshot(models.Model):
-    """Aggregated completion score at a point in time."""
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='snapshots')
     snapshot_date = models.DateTimeField(auto_now_add=True)
     completion_percentage = models.FloatField()
@@ -64,4 +80,4 @@ class ProjectCompletionSnapshot(models.Model):
         ordering = ['-snapshot_date']
 
     def __str__(self):
-        return f"{self.project.title} @ {self.completion_percentage:.1f}% ({self.snapshot_date.date()})"
+        return f"{self.project.title} @ {self.completion_percentage:.1f}%"

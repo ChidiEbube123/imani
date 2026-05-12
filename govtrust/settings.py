@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'monitoring',
     'payments',
     'blockchain_ledger',
+     'citizens',
 ]
 
 MIDDLEWARE = [

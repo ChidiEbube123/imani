@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Submit Evidence — {{ project.title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="text-muted mb-2"><a href="{% url 'public_project_detail' project.pk %}">{{ project.title }}</a> / Submit Evidence</div>
+  <h1>Submit a Photo</h1>
+  <p>Your crowdsourced photo will be analysed by AI and contribute to the project's verified completion score</p>
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      <div class="grid" style="gap:1rem;margin-bottom:1.25rem">
+        <div class="form-group">
+          <label>Photo of Project Site</label>
+          <input type="file" name="image" class="form-control" accept="image/*" required id="img-input">
+          <div class="text-muted mt-1" style="font-size:.75rem">Max 15MB. JPG, PNG, HEIC accepted.</div>
+          <div id="preview-wrap" style="display:none;margin-top:.75rem">
+            <img id="preview" style="max-width:100%;border-radius:8px;max-height:220px;object-fit:cover">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes (optional)</label>
+          <textarea name="notes" class="form-control" rows="3" placeholder="Describe what you see — construction stage, materials, workers present, issues noticed..."></textarea>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:.75rem">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:.4rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em">Your GPS Location</div>
+          <input type="hidden" name="gps_lat" id="lat-field">
+          <input type="hidden" name="gps_lng" id="lng-field">
+          <div id="gps-status" style="font-size:.8rem;color:var(--muted)">&#10067; Detecting location...</div>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Submit &amp; Analyse Photo</button>
+      <div class="text-muted mt-2" style="font-size:.78rem;text-align:center">Results usually appear within a few seconds</div>
+    </form>
+  </div>
+
+  <div>
+    <div class="card card-sm mb-2" style="border-color:rgba(0,212,170,.2)">
+      <div style="font-weight:600;margin-bottom:.75rem">&#127919; What to photograph</div>
+      <div style="font-size:.82rem;color:var(--muted);line-height:1.8">
+        &#10003; The overall project site from a clear angle<br>
+        &#10003; Specific construction stages (foundation, walls, roof)<br>
+        &#10003; Materials on site, equipment, workers<br>
+        &#10007; Avoid photos of people's faces<br>
+        &#10007; Don't submit unrelated images — it affects accuracy
+      </div>
+    </div>
+    <div class="card card-sm">
+      <div style="font-weight:600;margin-bottom:.75rem">{{ project.title }}</div>
+      <div class="stat-label">Current Completion</div>
+      <div class="mono" style="font-size:1.4rem;color:var(--accent);font-weight:700;margin:.3rem 0">{{ project.completion_percentage|floatformat:1 }}%</div>
+      <div class="progress-wrap mb-2"><div class="progress-bar green" style="width:{{ project.completion_percentage }}%"></div></div>
+      <div style="font-size:.8rem;color:var(--muted)">&#8358;{{ project.total_budget|floatformat:0 }} total budget<br>{{ project.location_name }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.getElementById('img-input').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(file){const r=new FileReader();r.onload=ev=>{document.getElementById('preview').src=ev.target.result;document.getElementById('preview-wrap').style.display='block';};r.readAsDataURL(file);}
+});
+if(navigator.geolocation){
+  navigator.geolocation.getCurrentPosition(pos=>{
+    document.getElementById('lat-field').value=pos.coords.latitude.toFixed(6);
+    document.getElementById('lng-field').value=pos.coords.longitude.toFixed(6);
+    document.getElementById('gps-status').innerHTML='&#9989; Location captured: '+pos.coords.latitude.toFixed(4)+', '+pos.coords.longitude.toFixed(4);
+    document.getElementById('gps-status').style.color='var(--success)';
+  },()=>{
+    document.getElementById('gps-status').innerHTML='&#9888; Location unavailable — photo will be submitted without GPS';
+  });
+}
+</script>
+{% endblock %}

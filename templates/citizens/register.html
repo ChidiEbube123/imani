@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Register — GovTrust{% endblock %}
+{% block content %}
+<div style="max-width:480px;margin:3rem auto">
+  <div style="text-align:center;margin-bottom:2rem">
+    <div style="font-size:2.5rem;margin-bottom:.5rem">&#127963;</div>
+    <h1 style="font-size:1.4rem;font-weight:700">Join GovTrust</h1>
+    <p class="text-muted">Help monitor government projects in your community</p>
+  </div>
+  <div class="card">
+    <form method="post">{% csrf_token %}
+      <div class="grid" style="gap:.9rem;margin-bottom:1.25rem">
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>First Name</label><input name="first_name" class="form-control" required value="{{ post.first_name|default:'' }}"></div>
+          <div class="form-group"><label>Last Name</label><input name="last_name" class="form-control" required value="{{ post.last_name|default:'' }}"></div>
+        </div>
+        <div class="form-group"><label>Username</label><input name="username" class="form-control" required value="{{ post.username|default:'' }}" autocomplete="username"></div>
+        <div class="form-group"><label>Email</label><input name="email" type="email" class="form-control" required value="{{ post.email|default:'' }}"></div>
+        <div class="form-group"><label>Phone</label><input name="phone" class="form-control" placeholder="+234..." value="{{ post.phone|default:'' }}"></div>
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>State</label><input name="state" class="form-control" placeholder="e.g. Abuja FCT" value="{{ post.state|default:'' }}"></div>
+          <div class="form-group"><label>LGA</label><input name="lga" class="form-control" placeholder="e.g. Garki" value="{{ post.lga|default:'' }}"></div>
+        </div>
+        <div class="form-group"><label>Password</label><input name="password" type="password" class="form-control" required autocomplete="new-password"><div class="text-muted mt-1" style="font-size:.75rem">Minimum 8 characters</div></div>
+        <div class="form-group"><label>Confirm Password</label><input name="confirm_password" type="password" class="form-control" required autocomplete="new-password"></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center">Create Account</button>
+    </form>
+    <div class="divider"></div>
+    <div style="text-align:center;font-size:.85rem;color:var(--muted)">Already have an account? <a href="{% url 'citizen_login' %}">Sign in</a></div>
+  </div>
+  <div class="card mt-2 card-sm" style="border-color:rgba(0,212,170,.2);background:rgba(0,212,170,.04)">
+    <div style="font-size:.82rem;color:var(--muted);line-height:1.6">
+      <strong style="color:var(--accent)">Why register?</strong><br>
+      As a verified citizen, you can upload photos of government projects near you, track completion progress, and help ensure public funds are used properly.
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,27 +1,71 @@
 {% extends 'base.html' %}
 {% block title %}Create Project — GovTrust{% endblock %}
 {% block content %}
-<div class="page-header"><h1>Create New Project</h1><p>Set up a new government project for AI monitoring</p></div>
-<div class="card" style="max-width:720px">
-  <form method="post">
-    {% csrf_token %}
-    <div class="grid grid-2" style="gap:1rem;margin-bottom:1rem">
-      <div class="form-group" style="grid-column:1/-1"><label>Project Title</label><input name="title" class="form-control" required placeholder="e.g. Abuja-Kaduna Expressway Phase 2"></div>
-      <div class="form-group"><label>Project Type</label><select name="project_type" class="form-control" required>{% for val, label in project_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
-      <div class="form-group"><label>Contractor</label><select name="contractor" class="form-control" required>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.company }} ({{ c.name }})</option>{% endfor %}</select></div>
-      <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea name="description" class="form-control" rows="3" placeholder="Project scope and objectives..."></textarea></div>
-      <div class="form-group" style="grid-column:1/-1"><label>Location Name</label><input name="location_name" class="form-control" required placeholder="e.g. Garki, Abuja FCT"></div>
-      <div class="form-group"><label>Latitude</label><input name="latitude" type="number" step="any" class="form-control" required placeholder="9.0765"></div>
-      <div class="form-group"><label>Longitude</label><input name="longitude" type="number" step="any" class="form-control" required placeholder="7.3986"></div>
-      <div class="form-group"><label>Total Budget (NGN)</label><input name="total_budget" type="number" step="0.01" class="form-control" required placeholder="500000000"></div>
-      <div class="form-group"><label>Start Date</label><input name="start_date" type="date" class="form-control" required></div>
-      <div class="form-group"><label>Expected End Date</label><input name="expected_end_date" type="date" class="form-control" required></div>
-    </div>
-    <div style="display:flex;gap:.75rem">
-      <button type="submit" class="btn btn-primary">Create Project + Milestones</button>
-      <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancel</a>
-    </div>
-    <div class="text-muted mt-2" style="font-size:.8rem">Standard payment milestones will be auto-created: Foundation (25%), Structure (50%), Roofing (70%), Finishing (90%), Complete (100%)</div>
-  </form>
+<div class="page-header"><h1>Create New Project</h1><p>Milestones are auto-generated based on project type</p></div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <form method="post">{% csrf_token %}
+      <div class="grid" style="gap:1rem;margin-bottom:1.25rem">
+        <div class="form-group"><label>Project Title</label><input name="title" class="form-control" required placeholder="e.g. Abuja-Kaduna Expressway Phase 2"></div>
+        <div class="form-group">
+          <label>Project Type</label>
+          <select name="project_type" class="form-control" required id="project-type-select">
+            {% for val, label in project_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label>Contractor</label><select name="contractor" class="form-control" required>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.company }} ({{ c.name }})</option>{% endfor %}</select></div>
+        <div class="form-group"><label>Description</label><textarea name="description" class="form-control" rows="3" placeholder="Project scope and objectives..."></textarea></div>
+        <div class="form-group"><label>Location Name</label><input name="location_name" class="form-control" required placeholder="e.g. Garki, Abuja FCT"></div>
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>Latitude</label><input name="latitude" type="number" step="any" class="form-control" required placeholder="9.0765"></div>
+          <div class="form-group"><label>Longitude</label><input name="longitude" type="number" step="any" class="form-control" required placeholder="7.3986"></div>
+        </div>
+        <div class="form-group"><label>Total Budget (NGN)</label><input name="total_budget" type="number" step="0.01" class="form-control" required placeholder="500000000"></div>
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>Start Date</label><input name="start_date" type="date" class="form-control" required></div>
+          <div class="form-group"><label>Expected End Date</label><input name="expected_end_date" type="date" class="form-control" required></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">Create Project</button>
+        <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" id="milestone-preview">
+    <div style="font-weight:600;margin-bottom:.25rem">Auto-generated Milestones</div>
+    <div class="text-muted mb-2" style="font-size:.8rem">Updates as you change project type</div>
+    <div id="milestone-list"><div class="text-muted">Select a project type to preview milestones.</div></div>
+  </div>
 </div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+const sel = document.getElementById('project-type-select');
+function loadMilestones(type) {
+  if(!type) return;
+  fetch('/api/milestone-template/' + type + '/')
+    .then(r => r.json())
+    .then(milestones => {
+      const list = document.getElementById('milestone-list');
+      list.innerHTML = milestones.map((m, i) => `
+        <div style="display:flex;align-items:flex-start;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border)">
+          <div style="width:22px;height:22px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-family:var(--mono);color:var(--accent)">${i+1}</div>
+          <div style="flex:1">
+            <div style="font-size:.86rem;font-weight:600">${m.title}</div>
+            <div style="font-size:.75rem;color:var(--muted);margin:.2rem 0 .3rem">${m.description}</div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+              <span class="badge badge-blue">Target: ${m.target_percentage}%</span>
+              <span class="badge badge-green">Payment: ${m.payment_percentage}% of budget</span>
+            </div>
+          </div>
+        </div>`).join('');
+    }).catch(() => {
+      document.getElementById('milestone-list').innerHTML = '<div class="text-muted">Could not load milestones.</div>';
+    });
+}
+sel.addEventListener('change', () => loadMilestones(sel.value));
+loadMilestones(sel.value);
+</script>
 {% endblock %}

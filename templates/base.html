@@ -3,180 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}GovTrust — Project Monitoring Platform{% endblock %}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>{% block title %}GovTrust{% endblock %}</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0b0f1a;
-  --surface: #111827;
-  --surface2: #1a2236;
-  --border: #1e2d45;
-  --accent: #00d4aa;
-  --accent2: #3b82f6;
-  --warn: #f59e0b;
-  --danger: #ef4444;
-  --success: #10b981;
-  --text: #e2e8f0;
-  --muted: #64748b;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Space Grotesk', sans-serif;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
-a { color: var(--accent); text-decoration: none; }
-a:hover { opacity: 0.8; }
-
-/* Nav */
-.nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 2rem; height: 60px; position: sticky; top: 0; z-index: 100; }
-.nav-logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; display: flex; align-items: center; gap: 0.5rem; }
-.nav-logo span { color: var(--text); }
-.nav-links { display: flex; gap: 0.25rem; flex: 1; }
-.nav-links a { padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; color: var(--muted); transition: all 0.15s; }
-.nav-links a:hover, .nav-links a.active { background: var(--surface2); color: var(--text); }
-.nav-badge { background: var(--accent); color: #000; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 99px; font-family: var(--mono); }
-
-/* Layout */
-.container { max-width: 1280px; margin: 0 auto; padding: 2rem; }
-.page-header { margin-bottom: 2rem; }
-.page-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
-.page-header p { color: var(--muted); margin-top: 0.25rem; font-size: 0.9rem; }
-
-/* Cards */
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-.card-sm { padding: 1rem; }
-.grid { display: grid; gap: 1rem; }
-.grid-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-4 { grid-template-columns: repeat(4, 1fr); }
-
-/* Stat card */
-.stat { display: flex; flex-direction: column; gap: 0.25rem; }
-.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
-.stat-value { font-size: 1.8rem; font-weight: 700; font-family: var(--mono); }
-.stat-sub { font-size: 0.8rem; color: var(--muted); }
-
-/* Progress bar */
-.progress-wrap { background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
-.progress-bar { height: 100%; border-radius: 99px; transition: width 0.5s ease; }
-.progress-bar.green { background: linear-gradient(90deg, var(--success), var(--accent)); }
-.progress-bar.blue { background: linear-gradient(90deg, var(--accent2), #818cf8); }
-.progress-bar.warn { background: linear-gradient(90deg, var(--warn), #f97316); }
-
-/* Badge */
-.badge { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-.badge-green { background: rgba(16,185,129,0.15); color: var(--success); }
-.badge-blue { background: rgba(59,130,246,0.15); color: var(--accent2); }
-.badge-yellow { background: rgba(245,158,11,0.15); color: var(--warn); }
-.badge-red { background: rgba(239,68,68,0.15); color: var(--danger); }
-.badge-gray { background: rgba(100,116,139,0.15); color: var(--muted); }
-.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-
-/* Button */
-.btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.1rem; border-radius: 8px; font-family: var(--sans); font-size: 0.85rem; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
-.btn-primary { background: var(--accent); color: #000; }
-.btn-primary:hover { background: #00b890; }
-.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { border-color: var(--accent); }
-.btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
-.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.78rem; }
-
-/* Table */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; }
-th { text-align: left; padding: 0.6rem 1rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); }
-td { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.87rem; vertical-align: middle; }
-tr:hover td { background: var(--surface2); }
-
-/* Form */
-.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
-.form-group label { font-size: 0.8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
-.form-control { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 0.6rem 0.9rem; border-radius: 8px; font-family: var(--sans); font-size: 0.9rem; width: 100%; transition: border-color 0.15s; }
-.form-control:focus { outline: none; border-color: var(--accent); }
-select.form-control { appearance: none; cursor: pointer; }
-
-/* Alert */
-.alert { padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.875rem; margin-bottom: 1rem; }
-.alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: var(--success); }
-.alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: var(--danger); }
-
-/* Mono text */
-.mono { font-family: var(--mono); font-size: 0.82rem; }
-
-/* Flex utilities */
-.flex { display: flex; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
-.flex-center { display: flex; align-items: center; }
-.gap-1 { gap: 0.5rem; }
-.gap-2 { gap: 1rem; }
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.text-muted { color: var(--muted); font-size: 0.85rem; }
-.text-right { text-align: right; }
-
-/* Chain verified indicator */
-.chain-indicator { font-family: var(--mono); font-size: 0.72rem; color: var(--success); display: flex; align-items: center; gap: 0.4rem; }
-.chain-indicator::before { content: '⛓'; }
-
-@media(max-width: 768px) {
-  .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .grid-2 { grid-template-columns: 1fr; }
-  .nav-links a span { display: none; }
-}
+:root{--bg:#0b0f1a;--surface:#111827;--surface2:#1a2236;--border:#1e2d45;--accent:#00d4aa;--accent2:#3b82f6;--warn:#f59e0b;--danger:#ef4444;--success:#10b981;--text:#e2e8f0;--muted:#64748b;--mono:'JetBrains Mono',monospace;--sans:'Space Grotesk',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{opacity:.8}
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;gap:1.5rem;height:60px;position:sticky;top:0;z-index:100}
+.nav-logo{font-size:1.05rem;font-weight:700;color:var(--accent);letter-spacing:-.5px;white-space:nowrap}
+.nav-logo span{color:var(--text)}
+.nav-links{display:flex;gap:.15rem;flex:1}
+.nav-links a{padding:.4rem .85rem;border-radius:6px;font-size:.83rem;font-weight:500;color:var(--muted);transition:all .15s}
+.nav-links a:hover,.nav-links a.active{background:var(--surface2);color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:.75rem;margin-left:auto}
+.nav-user{font-size:.8rem;color:var(--muted)}
+.nav-user strong{color:var(--text)}
+.chain-ok{font-family:var(--mono);font-size:.7rem;color:var(--success)}
+.chain-err{font-family:var(--mono);font-size:.7rem;color:var(--danger)}
+.container{max-width:1280px;margin:0 auto;padding:2rem}
+.page-header{margin-bottom:2rem}
+.page-header h1{font-size:1.55rem;font-weight:700;letter-spacing:-.5px}
+.page-header p{color:var(--muted);margin-top:.25rem;font-size:.88rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+.card-sm{padding:1rem}
+.grid{display:grid;gap:1rem}
+.grid-2{grid-template-columns:repeat(2,1fr)}
+.grid-3{grid-template-columns:repeat(3,1fr)}
+.grid-4{grid-template-columns:repeat(4,1fr)}
+.stat{display:flex;flex-direction:column;gap:.25rem}
+.stat-label{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.stat-value{font-size:1.75rem;font-weight:700;font-family:var(--mono)}
+.stat-sub{font-size:.78rem;color:var(--muted)}
+.progress-wrap{background:var(--surface2);border-radius:99px;height:8px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;transition:width .5s ease}
+.progress-bar.green{background:linear-gradient(90deg,var(--success),var(--accent))}
+.progress-bar.blue{background:linear-gradient(90deg,var(--accent2),#818cf8)}
+.progress-bar.warn{background:linear-gradient(90deg,var(--warn),#f97316)}
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:99px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge-green{background:rgba(16,185,129,.15);color:var(--success)}
+.badge-blue{background:rgba(59,130,246,.15);color:var(--accent2)}
+.badge-yellow{background:rgba(245,158,11,.15);color:var(--warn)}
+.badge-red{background:rgba(239,68,68,.15);color:var(--danger)}
+.badge-gray{background:rgba(100,116,139,.15);color:var(--muted)}
+.badge-teal{background:rgba(0,212,170,.15);color:var(--accent)}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;border-radius:8px;font-family:var(--sans);font-size:.84rem;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#00b890;color:#000}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--accent)}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.3)}
+.btn-sm{padding:.3rem .7rem;font-size:.76rem}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:.6rem 1rem;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
+td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.86rem;vertical-align:middle}
+tr:hover td{background:var(--surface2)}
+.form-group{display:flex;flex-direction:column;gap:.4rem}
+.form-group label{font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.form-control{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:.6rem .9rem;border-radius:8px;font-family:var(--sans);font-size:.88rem;width:100%;transition:border-color .15s}
+.form-control:focus{outline:none;border-color:var(--accent)}
+.alert{padding:.75rem 1rem;border-radius:8px;font-size:.875rem;margin-bottom:1rem}
+.alert-success{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--success)}
+.alert-error{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--danger)}
+.mono{font-family:var(--mono);font-size:.82rem}
+.flex{display:flex}.flex-between{display:flex;justify-content:space-between;align-items:center}
+.flex-center{display:flex;align-items:center}.gap-1{gap:.5rem}.gap-2{gap:1rem}
+.mt-1{margin-top:.5rem}.mt-2{margin-top:1rem}.mt-3{margin-top:1.5rem}.mb-2{margin-bottom:1rem}
+.text-muted{color:var(--muted);font-size:.85rem}.text-right{text-align:right}
+.divider{height:1px;background:var(--border);margin:1.5rem 0}
+@media(max-width:768px){.grid-4,.grid-3{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.nav-links a span{display:none}}
 </style>
 {% block extra_head %}{% endblock %}
 </head>
 <body>
-
 <nav class="nav">
-  <div class="nav-logo">🏛 <span>Gov</span>Trust</div>
+  <div class="nav-logo">&#127963; <span>Gov</span>Trust</div>
   <div class="nav-links">
-    <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
-      <span>Dashboard</span>
-    </a>
-    <a href="{% url 'project_list' %}" {% if 'project' in request.resolver_match.url_name %}class="active"{% endif %}>
-      <span>Projects</span>
-    </a>
-    <a href="{% url 'payment_list' %}" {% if 'payment' in request.resolver_match.url_name %}class="active"{% endif %}>
-      <span>Payments</span>
-    </a>
-    <a href="{% url 'ledger_view' %}" {% if 'ledger' in request.resolver_match.url_name %}class="active"{% endif %}>
-      <span>Ledger</span>
-    </a>
-    <a href="{% url 'contractor_list' %}">
-      <span>Contractors</span>
-    </a>
+    {% if user.is_authenticated and user.is_staff %}
+      <a href="{% url 'dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>Dashboard</a>
+      <a href="{% url 'project_list' %}" {% if request.resolver_match.url_name == 'project_list' %}class="active"{% endif %}>Projects</a>
+      <a href="{% url 'payment_list' %}" {% if 'payment' in request.resolver_match.url_name %}class="active"{% endif %}>Payments</a>
+      <a href="{% url 'ledger_view' %}" {% if 'ledger' in request.resolver_match.url_name %}class="active"{% endif %}>Ledger</a>
+      <a href="{% url 'contractor_list' %}">Contractors</a>
+    {% else %}
+      <a href="{% url 'public_project_list' %}" {% if request.resolver_match.url_name == 'public_project_list' %}class="active"{% endif %}>Projects</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'citizen_dashboard' %}" {% if request.resolver_match.url_name == 'citizen_dashboard' %}class="active"{% endif %}>My Dashboard</a>
+      {% endif %}
+    {% endif %}
   </div>
-  <div class="chain-indicator" id="chain-status">Verifying chain...</div>
+  <div class="nav-right">
+    {% if user.is_authenticated and user.is_staff %}
+      <span id="chain-status" class="chain-ok">verifying chain...</span>
+    {% endif %}
+    {% if user.is_authenticated %}
+      <span class="nav-user">
+        {% if user.is_staff %}<span class="badge badge-yellow">Admin</span>{% else %}<span class="badge badge-teal">Citizen</span>{% endif %}
+        <strong>{{ user.get_full_name|default:user.username }}</strong>
+      </span>
+      {% if not user.is_staff %}
+        <a href="{% url 'citizen_profile' %}" class="btn btn-secondary btn-sm">Profile</a>
+      {% endif %}
+      <a href="{% url 'citizen_logout' %}" class="btn btn-secondary btn-sm">Logout</a>
+    {% else %}
+      <a href="{% url 'citizen_login' %}" class="btn btn-secondary btn-sm">Login</a>
+      <a href="{% url 'citizen_register' %}" class="btn btn-primary btn-sm">Register</a>
+    {% endif %}
+  </div>
 </nav>
-
 <div class="container">
   {% for message in messages %}
-    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
-      {{ message }}
-    </div>
+    <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">{{ message }}</div>
   {% endfor %}
   {% block content %}{% endblock %}
 </div>
-
 <script>
-// Live chain status check
-fetch('/blockchain/api/status/')
-  .then(r => r.json())
-  .then(d => {
-    const el = document.getElementById('chain-status');
-    if(d.valid) {
-      el.textContent = `${d.block_count} blocks — VALID`;
-      el.style.color = 'var(--success)';
-    } else {
-      el.textContent = 'CHAIN INTEGRITY ERROR';
-      el.style.color = 'var(--danger)';
-    }
-  }).catch(() => {
-    document.getElementById('chain-status').textContent = 'chain offline';
-  });
+{% if user.is_authenticated and user.is_staff %}
+fetch('/blockchain/api/status/').then(r=>r.json()).then(d=>{
+  const el=document.getElementById('chain-status');
+  if(el){el.textContent=d.valid?`${d.block_count} blocks OK`:'CHAIN ERROR';el.className=d.valid?'chain-ok':'chain-err';}
+}).catch(()=>{});
+{% endif %}
 </script>
 {% block extra_scripts %}{% endblock %}
 </body>

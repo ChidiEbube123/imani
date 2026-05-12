@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header"><h1>My Profile</h1><p>Your citizen monitoring account</p></div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Account Details</div>
+    <form method="post">{% csrf_token %}
+      <div class="grid" style="gap:.9rem;margin-bottom:1.25rem">
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>First Name</label><input name="first_name" class="form-control" value="{{ user.first_name }}"></div>
+          <div class="form-group"><label>Last Name</label><input name="last_name" class="form-control" value="{{ user.last_name }}"></div>
+        </div>
+        <div class="form-group"><label>Username</label><input class="form-control" value="{{ user.username }}" disabled style="opacity:.5"></div>
+        <div class="form-group"><label>Email</label><input class="form-control" value="{{ user.email }}" disabled style="opacity:.5"></div>
+        <div class="form-group"><label>Phone</label><input name="phone" class="form-control" value="{{ profile.phone }}"></div>
+        <div class="grid grid-2" style="gap:.75rem">
+          <div class="form-group"><label>State</label><input name="state" class="form-control" value="{{ profile.state }}"></div>
+          <div class="form-group"><label>LGA</label><input name="lga" class="form-control" value="{{ profile.lga }}"></div>
+        </div>
+        <div class="form-group"><label>Bio</label><textarea name="bio" class="form-control" rows="2">{{ profile.bio }}</textarea></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+  </div>
+  <div>
+    <div class="card mb-2">
+      <div style="font-weight:600;margin-bottom:1rem">Contribution Stats</div>
+      <div class="grid grid-2" style="gap:.75rem">
+        <div class="stat"><div class="stat-label">Total</div><div class="stat-value" style="color:var(--accent)">{{ profile.total_submissions }}</div></div>
+        <div class="stat"><div class="stat-label">Accepted</div><div class="stat-value" style="color:var(--success)">{{ profile.accepted_submissions }}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="flex-between"><span class="text-muted">Account status</span>{% if profile.is_verified %}<span class="badge badge-green">Verified</span>{% else %}<span class="badge badge-yellow">Unverified</span>{% endif %}</div>
+      <div class="flex-between mt-1"><span class="text-muted">Member since</span><span class="mono" style="font-size:.8rem">{{ profile.created_at|date:"M Y" }}</span></div>
+    </div>
+    <div class="card">
+      <div class="flex-between mb-2"><div style="font-weight:600">All Submissions</div></div>
+      {% for ev in submissions %}
+      <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid var(--border)">
+        <img src="{{ ev.image.url }}" style="width:40px;height:40px;object-fit:cover;border-radius:5px;flex-shrink:0">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ev.project.title }}</div>
+          <div style="font-size:.72rem;color:var(--muted)">{{ ev.uploaded_at|date:"M d, Y" }}</div>
+        </div>
+        <span class="badge {% if ev.status == 'analyzed' %}badge-green{% elif ev.status == 'rejected' %}badge-red{% else %}badge-yellow{% endif %}">{{ ev.status }}</span>
+      </div>
+      {% empty %}<div class="text-muted">No submissions yet.</div>{% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

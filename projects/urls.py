@@ -9,4 +9,5 @@ urlpatterns = [
     path('contractors/', views.contractor_list, name='contractor_list'),
     path('contractors/create/', views.contractor_create, name='contractor_create'),
     path('api/projects/', views.projects_api, name='projects_api'),
+    path('api/milestone-template/<str:project_type>/', views.milestone_template_api, name='milestone_template_api'),
 ]

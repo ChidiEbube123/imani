@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Projects — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Government Projects</h1>
+  <p>Track infrastructure projects funded by public money — contribute photos to verify progress</p>
+</div>
+<div class="card mb-2">
+  <form method="get" style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:flex-end">
+    <div class="form-group" style="flex:2;min-width:180px"><label>Search</label><input name="q" class="form-control" placeholder="Project name or location..." value="{{ search }}"></div>
+    <div class="form-group" style="flex:1;min-width:140px"><label>Status</label><select name="status" class="form-control"><option value="">All</option><option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option><option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option><option value="paused" {% if status_filter == 'paused' %}selected{% endif %}>Paused</option></select></div>
+    <div class="form-group" style="flex:1;min-width:140px"><label>Type</label><select name="type" class="form-control"><option value="">All Types</option>{% for val, label in project_types %}<option value="{{ val }}" {% if type_filter == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <button type="submit" class="btn btn-secondary">Filter</button>
+    <a href="{% url 'public_project_list' %}" class="btn btn-secondary">Clear</a>
+  </form>
+</div>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem">
+  {% for p in projects %}
+  <div class="card card-sm" style="transition:border-color .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">
+    <div class="flex-between" style="margin-bottom:.6rem">
+      <span class="badge badge-blue">{{ p.get_project_type_display }}</span>
+      {% if p.status == 'active' %}<span class="badge badge-green">Active</span>{% elif p.status == 'completed' %}<span class="badge badge-blue">Completed</span>{% else %}<span class="badge badge-gray">{{ p.status }}</span>{% endif %}
+    </div>
+    <div style="font-weight:600;margin-bottom:.25rem;font-size:.95rem"><a href="{% url 'public_project_detail' p.pk %}" style="color:var(--text)">{{ p.title }}</a></div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:.75rem">&#128205; {{ p.location_name }}</div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.35rem">
+      <span style="font-size:.75rem;color:var(--muted)">Completion</span>
+      <span class="mono" style="color:var(--accent);font-weight:600">{{ p.completion_percentage|floatformat:1 }}%</span>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:.75rem"><div class="progress-bar {% if p.completion_percentage >= 80 %}green{% elif p.completion_percentage >= 40 %}blue{% else %}warn{% endif %}" style="width:{{ p.completion_percentage }}%"></div></div>
+    <div class="flex-between">
+      <span style="font-size:.78rem;color:var(--muted)">&#8358;{{ p.total_budget|floatformat:0 }}</span>
+      <div style="display:flex;gap:.5rem">
+        <a href="{% url 'public_project_detail' p.pk %}" class="btn btn-secondary btn-sm">View</a>
+        {% if user.is_authenticated and p.status == 'active' %}<a href="{% url 'citizen_upload' p.pk %}" class="btn btn-primary btn-sm">Submit Photo</a>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:4rem">No projects match your filters.</div>
+  {% endfor %}
+</div>
+{% if not user.is_authenticated %}
+<div class="card mt-3" style="border-color:rgba(0,212,170,.25);background:rgba(0,212,170,.04);text-align:center;padding:2rem">
+  <div style="font-size:1.5rem;margin-bottom:.5rem">&#128247;</div>
+  <div style="font-weight:600;margin-bottom:.5rem">Be a Project Monitor</div>
+  <div class="text-muted" style="margin-bottom:1rem;max-width:400px;margin-left:auto;margin-right:auto">Register as a citizen to submit photos of these projects and help verify government spending.</div>
+  <a href="{% url 'citizen_register' %}" class="btn btn-primary">Register Free</a>
+</div>
+{% endif %}
+{% endblock %}

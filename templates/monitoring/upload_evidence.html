@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Upload Evidence — {{ project.title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="text-muted mb-2"><a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a> / Upload Evidence</div>
+  <h1>Upload Evidence</h1>
+  <p>Upload satellite images, camera footage stills, or crowdsourced photos for AI analysis</p>
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      <div class="grid" style="gap:1rem;margin-bottom:1rem">
+        <div class="form-group">
+          <label>Image / Screenshot</label>
+          <input type="file" name="image" class="form-control" accept="image/*" required id="img-input">
+          <div id="preview-wrap" style="display:none;margin-top:.75rem"><img id="preview" style="max-width:100%;border-radius:8px;max-height:200px;object-fit:cover"></div>
+        </div>
+        <div class="form-group">
+          <label>Source Type</label>
+          <select name="source" class="form-control">
+            <option value="satellite">Satellite Image</option>
+            <option value="camera_gov">Government Camera</option>
+            <option value="camera_crowd">Crowdsourced Camera</option>
+            <option value="drone">Drone Footage</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Your Name (optional)</label><input name="uploader_name" class="form-control" placeholder="John Citizen"></div>
+        <div class="form-group"><label>Phone (optional)</label><input name="uploader_phone" class="form-control" placeholder="+234..."></div>
+        <div class="form-group"><label>GPS Latitude (optional)</label><input name="gps_lat" type="number" step="any" class="form-control" placeholder="9.0765" id="lat-field"></div>
+        <div class="form-group"><label>GPS Longitude (optional)</label><input name="gps_lng" type="number" step="any" class="form-control" placeholder="7.3986" id="lng-field"></div>
+        <div class="form-group"><label>Notes</label><textarea name="notes" class="form-control" rows="2" placeholder="Observations about the site..."></textarea></div>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button type="submit" class="btn btn-primary">Upload & Analyse</button>
+        <a href="{% url 'evidence_list' project.pk %}" class="btn btn-secondary">Cancel</a>
+      </div>
+      <div class="text-muted mt-2" style="font-size:.8rem">The image will be processed by our AI engine immediately. Results typically take under 5 seconds.</div>
+    </form>
+  </div>
+  <div>
+    <div class="card card-sm mb-2">
+      <div style="font-weight:600;margin-bottom:.75rem">How AI Analysis Works</div>
+      <div style="font-size:.85rem;color:var(--muted);line-height:1.6">
+        <div style="margin-bottom:.5rem">&#9312; Your image is processed by a YOLOv3 construction detection model</div>
+        <div style="margin-bottom:.5rem">&#9313; Detected elements are mapped to construction stages (foundation, structure, roofing, finishing, landscaping)</div>
+        <div style="margin-bottom:.5rem">&#9314; A weighted completion score is computed</div>
+        <div style="margin-bottom:.5rem">&#9315; The result is recorded on the blockchain ledger</div>
+        <div>&#9316; If a milestone is crossed, a payment is automatically triggered for approval</div>
+      </div>
+    </div>
+    <div class="card card-sm">
+      <div style="font-weight:600;margin-bottom:.75rem">Project: {{ project.title }}</div>
+      <div style="font-size:.85rem;color:var(--muted)">Current Completion</div>
+      <div class="mono" style="font-size:1.5rem;color:var(--accent);font-weight:700;margin:.25rem 0">{{ project.completion_percentage|floatformat:1 }}%</div>
+      <div class="progress-wrap"><div class="progress-bar green" style="width:{{ project.completion_percentage }}%"></div></div>
+      <div style="font-size:.8rem;color:var(--muted);margin-top:.5rem">Budget: N{{ project.total_budget|floatformat:0 }}</div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_scripts %}
+<script>
+document.getElementById('img-input').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('preview').src = ev.target.result;
+      document.getElementById('preview-wrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+});
+if(navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    document.getElementById('lat-field').value = pos.coords.latitude.toFixed(6);
+    document.getElementById('lng-field').value = pos.coords.longitude.toFixed(6);
+  });
+}
+</script>
+{% endblock %}

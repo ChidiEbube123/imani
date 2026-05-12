@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Evidence — {{ project.title }}{% endblock %}
+{% block content %}
+<div class="page-header flex-between">
+  <div><div class="text-muted mb-2"><a href="{% url 'project_detail' project.pk %}">{{ project.title }}</a> / Evidence</div><h1>Media Evidence</h1><p>Satellite, camera and crowdsourced images for AI analysis</p></div>
+  <a href="{% url 'upload_evidence' project.pk %}" class="btn btn-primary">+ Upload Evidence</a>
+</div>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem">
+  {% for ev in evidence %}
+  <div class="card card-sm">
+    <img src="{{ ev.image.url }}" style="width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+      <span class="badge badge-blue">{{ ev.get_source_display }}</span>
+      <span class="badge {% if ev.status == 'analyzed' %}badge-green{% elif ev.status == 'rejected' %}badge-red{% else %}badge-yellow{% endif %}">{{ ev.status }}</span>
+    </div>
+    {% if ev.status == 'analyzed' and ev.analysis %}
+    <div style="background:var(--surface2);border-radius:8px;padding:.75rem;margin-bottom:.75rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.5rem"><span style="font-size:.8rem;color:var(--muted)">AI Score</span><span class="mono" style="color:var(--accent);font-weight:700">{{ ev.analysis.completion_score|floatformat:1 }}%</span></div>
+      <div class="progress-wrap"><div class="progress-bar green" style="width:{{ ev.analysis.completion_score }}%"></div></div>
+      <div style="margin-top:.5rem;font-size:.72rem;color:var(--muted)">Confidence: {{ ev.analysis.confidence|floatformat:2 }} | {{ ev.analysis.model_version }}</div>
+      {% if ev.analysis.stage_scores %}
+      <div style="margin-top:.5rem;font-size:.72rem;color:var(--muted)">
+        {% for stage, score in ev.analysis.stage_scores.items %}<span style="margin-right:.5rem">{{ stage }}: {{ score|floatformat:0 }}%</span>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div style="font-size:.78rem;color:var(--muted)">
+      {% if ev.uploader_name %}By {{ ev.uploader_name }} &mdash; {% endif %}{{ ev.uploaded_at|date:"M d, Y H:i" }}
+    </div>
+    <div style="display:flex;gap:.5rem;margin-top:.75rem">
+      <a href="/monitoring/api/evidence/{{ ev.pk }}/analysis/" class="btn btn-secondary btn-sm" target="_blank">JSON</a>
+      <form method="post" action="/monitoring/api/evidence/{{ ev.pk }}/reanalyse/" style="display:inline">{% csrf_token %}<button type="submit" class="btn btn-secondary btn-sm">Re-analyse</button></form>
+    </div>
+  </div>
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:3rem"><div style="font-size:2rem;margin-bottom:.5rem">&#128247;</div>No evidence uploaded yet. <a href="{% url 'upload_evidence' project.pk %}">Upload the first image</a>.</div>
+  {% endfor %}
+</div>
+{% endblock %}

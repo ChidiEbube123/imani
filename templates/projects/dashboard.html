@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between">
+  <div><h1>Project Monitoring Dashboard</h1><p>AI-powered government infrastructure oversight</p></div>
+  <a href="{% url 'project_create' %}" class="btn btn-primary">+ New Project</a>
+</div>
+<div class="grid grid-4 mb-2">
+  <div class="card stat"><div class="stat-label">Total Projects</div><div class="stat-value" style="color:var(--accent)">{{ stats.total }}</div><div class="stat-sub">{{ stats.active }} active</div></div>
+  <div class="card stat"><div class="stat-label">Total Budget</div><div class="stat-value" style="color:var(--accent2);font-size:1.2rem">N{{ stats.total_budget|floatformat:0 }}</div><div class="stat-sub">All projects</div></div>
+  <div class="card stat"><div class="stat-label">Total Released</div><div class="stat-value" style="color:var(--success);font-size:1.2rem">N{{ stats.total_paid|floatformat:0 }}</div><div class="stat-sub">Performance-linked</div></div>
+  <div class="card stat"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--warn)">{{ stats.completed }}</div><div class="stat-sub">Projects finished</div></div>
+</div>
+<div class="card">
+  <div class="flex-between mb-2"><h2 style="font-size:1rem;font-weight:600">Recent Projects</h2><a href="{% url 'project_list' %}" class="btn btn-secondary btn-sm">View All</a></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Project</th><th>Type</th><th>Contractor</th><th>Completion</th><th>Budget</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for p in projects %}
+      <tr>
+        <td><strong>{{ p.title }}</strong><br><span class="text-muted">{{ p.location_name }}</span></td>
+        <td><span class="badge badge-blue">{{ p.get_project_type_display }}</span></td>
+        <td>{{ p.contractor.company }}</td>
+        <td style="min-width:140px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="mono">{{ p.completion_percentage|floatformat:1 }}%</span></div>
+          <div class="progress-wrap"><div class="progress-bar {% if p.completion_percentage >= 80 %}green{% elif p.completion_percentage >= 40 %}blue{% else %}warn{% endif %}" style="width:{{ p.completion_percentage }}%"></div></div>
+        </td>
+        <td class="mono">N{{ p.total_budget|floatformat:0 }}</td>
+        <td>{% if p.status == 'active' %}<span class="badge badge-green">Active</span>{% elif p.status == 'completed' %}<span class="badge badge-blue">Completed</span>{% elif p.status == 'paused' %}<span class="badge badge-yellow">Paused</span>{% else %}<span class="badge badge-gray">{{ p.status }}</span>{% endif %}</td>
+        <td><a href="{% url 'project_detail' p.pk %}" class="btn btn-secondary btn-sm">View</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">No projects yet. <a href="{% url 'project_create' %}">Create one</a>.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+<div class="grid grid-3 mt-2">
+  <a href="{% url 'contractor_create' %}" class="card card-sm" style="display:block;border-color:var(--border);transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:1.4rem;margin-bottom:.5rem">&#128119;</div><div style="font-weight:600;margin-bottom:.25rem">Register Contractor</div><div class="text-muted">Add a new contractor to the platform</div></a>
+  <a href="{% url 'payment_list' %}" class="card card-sm" style="display:block;border-color:var(--border);transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:1.4rem;margin-bottom:.5rem">&#128179;</div><div style="font-weight:600;margin-bottom:.25rem">Payment Queue</div><div class="text-muted">Review and approve pending payments</div></a>
+  <a href="{% url 'ledger_view' %}" class="card card-sm" style="display:block;border-color:var(--border);transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'"><div style="font-size:1.4rem;margin-bottom:.5rem">&#9935;</div><div style="font-weight:600;margin-bottom:.25rem">Blockchain Ledger</div><div class="text-muted">Immutable audit trail of all transactions</div></a>
+</div>
+{% endblock %}

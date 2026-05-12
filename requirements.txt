@@ -1,0 +1,9 @@
+django>=6.0
+djangorestframework>=3.17
+pillow>=10.0
+django-cors-headers>=4.0
+celery>=5.3           # async tasks (optional for MVP)
+web3>=7.0             # optional: if you want real Ethereum later
+# For real YOLO inference, add:
+# opencv-python>=4.8
+# numpy>=1.24

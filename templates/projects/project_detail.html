@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}{{ project.title }} — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between">
+  <div>
+    <div class="text-muted mb-2"><a href="{% url 'project_list' %}">Projects</a> / {{ project.title }}</div>
+    <h1>{{ project.title }}</h1>
+    <p>{{ project.location_name }} &mdash; {{ project.contractor.company }}</p>
+  </div>
+  <div class="flex gap-1">
+    <a href="{% url 'upload_evidence' project.pk %}" class="btn btn-primary">+ Upload Evidence</a>
+    <a href="{% url 'evidence_list' project.pk %}" class="btn btn-secondary">All Evidence</a>
+  </div>
+</div>
+
+<div class="grid grid-2 mb-2">
+  <div class="card">
+    <div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.5rem"><span style="font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600">AI-Computed Completion</span><span class="mono" style="font-size:1.5rem;font-weight:700;color:var(--accent)">{{ project.completion_percentage|floatformat:1 }}%</span></div><div class="progress-wrap" style="height:12px"><div class="progress-bar green" style="width:{{ project.completion_percentage }}%"></div></div></div>
+    <div class="grid grid-2" style="gap:.75rem">
+      <div><div class="stat-label">Budget</div><div style="font-family:var(--mono);font-weight:600">N{{ project.total_budget|floatformat:0 }}</div></div>
+      <div><div class="stat-label">Paid Out</div><div style="font-family:var(--mono);font-weight:600;color:var(--success)">N{{ project.amount_paid|floatformat:0 }}</div></div>
+      <div><div class="stat-label">Start Date</div><div class="mono">{{ project.start_date }}</div></div>
+      <div><div class="stat-label">Expected End</div><div class="mono">{{ project.expected_end_date }}</div></div>
+      <div><div class="stat-label">Type</div><span class="badge badge-blue">{{ project.get_project_type_display }}</span></div>
+      <div><div class="stat-label">Status</div>{% if project.status == 'active' %}<span class="badge badge-green">Active</span>{% elif project.status == 'completed' %}<span class="badge badge-blue">Completed</span>{% else %}<span class="badge badge-gray">{{ project.status }}</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Milestones</div>
+    {% for m in milestones %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div style="width:20px;height:20px;border-radius:50%;background:{% if m.achieved %}var(--success){% else %}var(--surface2){% endif %};border:2px solid {% if m.achieved %}var(--success){% else %}var(--border){% endif %};flex-shrink:0"></div>
+      <div style="flex:1"><div style="font-size:.85rem;font-weight:500">{{ m.title }}</div><div style="font-size:.75rem;color:var(--muted)">Target: {{ m.target_percentage }}% | Payment: {{ m.payment_percentage }}% of budget</div></div>
+      {% if m.achieved %}<span class="badge badge-green">Done</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Recent Evidence</div>
+    {% for ev in evidence %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <img src="{{ ev.image.url }}" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0">
+      <div style="flex:1">
+        <div style="font-size:.85rem;font-weight:500">{{ ev.get_source_display }}</div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ ev.uploaded_at|date:"M d, Y H:i" }} &mdash; <span class="badge {% if ev.status == 'analyzed' %}badge-green{% else %}badge-yellow{% endif %}">{{ ev.status }}</span></div>
+        {% if ev.status == 'analyzed' and ev.analysis %}<div style="font-size:.75rem;color:var(--accent);margin-top:.25rem">Score: {{ ev.analysis.completion_score|floatformat:1 }}% (conf: {{ ev.analysis.confidence|floatformat:2 }})</div>{% endif %}
+      </div>
+      <a href="/monitoring/api/evidence/{{ ev.pk }}/analysis/" class="btn btn-secondary btn-sm" target="_blank">JSON</a>
+    </div>
+    {% empty %}<div class="text-muted">No evidence yet. <a href="{% url 'upload_evidence' project.pk %}">Upload some</a>.</div>{% endfor %}
+  </div>
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Payment History</div>
+    {% for pay in payments %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-family:var(--mono);font-weight:600">N{{ pay.amount|floatformat:2 }}</div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ pay.reference }} &mdash; {{ pay.created_at|date:"M d, Y" }}</div>
+        {% if pay.blockchain_tx_hash %}<div style="font-size:.7rem;color:var(--success);font-family:var(--mono)">TX: {{ pay.blockchain_tx_hash|slice:":20" }}...</div>{% endif %}
+      </div>
+      {% if pay.status == 'released' %}<span class="badge badge-green">Released</span>{% elif pay.status == 'pending' %}<span class="badge badge-yellow">Pending</span>{% else %}<span class="badge badge-gray">{{ pay.status }}</span>{% endif %}
+      <a href="{% url 'payment_detail' pay.pk %}" class="btn btn-secondary btn-sm">View</a>
+    </div>
+    {% empty %}<div class="text-muted">No payments yet. Upload evidence to trigger milestone payments.</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

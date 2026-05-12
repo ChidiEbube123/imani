@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Payment {{ payment.reference }} — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="text-muted mb-2"><a href="{% url 'payment_list' %}">Payments</a> / {{ payment.reference }}</div>
+  <h1>Payment Review</h1>
+</div>
+<div class="grid grid-2" style="align-items:start">
+  <div class="card">
+    <div style="font-weight:700;font-size:1.5rem;font-family:var(--mono);color:var(--accent);margin-bottom:1rem">N{{ payment.amount|floatformat:2 }}</div>
+    <div class="grid grid-2" style="gap:.75rem;margin-bottom:1.5rem">
+      <div><div class="stat-label">Project</div><div style="font-weight:600">{{ payment.project.title }}</div></div>
+      <div><div class="stat-label">Contractor</div><div>{{ payment.project.contractor.company }}</div></div>
+      <div><div class="stat-label">Milestone</div><div>{% if payment.milestone %}{{ payment.milestone.title }}{% else %}&mdash;{% endif %}</div></div>
+      <div><div class="stat-label">Status</div>{% if payment.status == 'released' %}<span class="badge badge-green">Released</span>{% elif payment.status == 'pending' %}<span class="badge badge-yellow">Pending</span>{% else %}<span class="badge badge-gray">{{ payment.status }}</span>{% endif %}</div>
+      <div><div class="stat-label">Completion at Trigger</div><div class="mono" style="color:var(--accent)">{{ payment.completion_at_trigger|floatformat:1 }}%</div></div>
+      <div><div class="stat-label">Created</div><div class="mono" style="font-size:.82rem">{{ payment.created_at|date:"M d, Y H:i" }}</div></div>
+    </div>
+    {% if payment.blockchain_tx_hash %}
+    <div style="background:var(--surface2);border-radius:8px;padding:.75rem;margin-bottom:1rem">
+      <div style="font-size:.75rem;color:var(--muted);margin-bottom:.25rem">BLOCKCHAIN TX HASH</div>
+      <div class="mono" style="color:var(--success);font-size:.78rem;word-break:break-all">{{ payment.blockchain_tx_hash }}</div>
+    </div>
+    {% endif %}
+    {% if payment.notes %}<div class="text-muted" style="font-size:.85rem;margin-bottom:1rem">{{ payment.notes }}</div>{% endif %}
+    {% if payment.status == 'pending' %}
+    <form method="post" action="{% url 'approve_payment' payment.pk %}">{% csrf_token %}
+      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:8px;padding:1rem;margin-bottom:1rem;font-size:.85rem">
+        <strong style="color:var(--success)">Approval Checklist</strong><br>
+        <div style="color:var(--muted);margin-top:.5rem;line-height:1.7">
+          &#10003; AI analysis confirms {{ payment.completion_at_trigger|floatformat:1 }}% completion<br>
+          &#10003; Evidence recorded on blockchain ledger<br>
+          &#10003; Payment matches milestone contract terms<br>
+          &#10003; Bank account verified for {{ payment.project.contractor.company }}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%">Approve & Release Payment</button>
+    </form>
+    {% endif %}
+  </div>
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:1rem">Audit Trail</div>
+    {% for log in logs %}
+    <div style="display:flex;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem"></div>
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:.85rem">{{ log.action }}</div>
+        <div style="font-size:.75rem;color:var(--muted)">{{ log.timestamp|date:"M d, Y H:i:s" }}{% if log.performed_by %} by {{ log.performed_by.username }}{% endif %}</div>
+        {% if log.details %}<div style="font-size:.72rem;color:var(--muted);font-family:var(--mono);margin-top:.25rem">{{ log.details }}</div>{% endif %}
+      </div>
+    </div>
+    {% empty %}<div class="text-muted">No audit logs yet.</div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

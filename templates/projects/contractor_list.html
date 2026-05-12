@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}Contractors — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between"><div><h1>Registered Contractors</h1><p>All approved contractors on the GovTrust platform</p></div><a href="{% url 'contractor_create' %}" class="btn btn-primary">+ Register Contractor</a></div>
+<div class="card"><div class="table-wrap"><table>
+  <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Reg. Number</th><th>Projects</th><th>Joined</th></tr></thead>
+  <tbody>
+    {% for c in contractors %}
+    <tr>
+      <td><strong>{{ c.name }}</strong></td>
+      <td>{{ c.company }}</td>
+      <td>{{ c.email }}</td>
+      <td class="mono">{{ c.registration_number }}</td>
+      <td>{{ c.projects.count }}</td>
+      <td>{{ c.created_at|date:"M d, Y" }}</td>
+    </tr>
+    {% empty %}<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:2rem">No contractors registered yet.</td></tr>{% endfor %}
+  </tbody>
+</table></div></div>
+{% endblock %}

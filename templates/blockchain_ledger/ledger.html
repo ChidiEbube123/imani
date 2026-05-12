@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Blockchain Ledger — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between">
+  <div><h1>Blockchain Ledger</h1><p>Immutable SHA-256 proof-of-work record of all transactions and analyses</p></div>
+  <div>
+    {% if valid %}
+    <span class="badge badge-green" style="font-size:.85rem;padding:.4rem 1rem">&#9733; Chain Valid</span>
+    {% else %}
+    <span class="badge badge-red" style="font-size:.85rem;padding:.4rem 1rem">&#9888; {{ message }}</span>
+    {% endif %}
+  </div>
+</div>
+<div class="card">
+  <div class="table-wrap"><table>
+    <thead><tr><th>#</th><th>Hash</th><th>Previous Hash</th><th>Event Type</th><th>Nonce</th><th>Timestamp</th><th></th></tr></thead>
+    <tbody>
+      {% for block in blocks %}
+      <tr>
+        <td class="mono" style="font-weight:700;color:var(--accent)">{{ block.index }}</td>
+        <td class="mono" style="font-size:.72rem;color:var(--success)">{{ block.hash|slice:":24" }}...</td>
+        <td class="mono" style="font-size:.72rem;color:var(--muted)">{{ block.previous_hash|slice:":16" }}...</td>
+        <td>{% if block.data.event %}<span class="badge {% if block.data.event == 'PAYMENT' %}badge-green{% else %}badge-blue{% endif %}">{{ block.data.event }}</span>{% else %}&mdash;{% endif %}</td>
+        <td class="mono" style="font-size:.8rem">{{ block.nonce }}</td>
+        <td class="text-muted" style="font-size:.78rem">{{ block.timestamp|date:"M d, Y H:i:s" }}</td>
+        <td><a href="/blockchain/api/block/{{ block.index }}/" class="btn btn-secondary btn-sm" target="_blank">JSON</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:3rem">Blockchain is empty. Transactions will appear here as they are recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+<div class="card mt-2">
+  <div style="font-weight:600;margin-bottom:.75rem">Verification Status</div>
+  <div class="mono" style="font-size:.85rem;color:{% if valid %}var(--success){% else %}var(--danger){% endif %}">{{ message }}</div>
+  <div class="text-muted mt-2" style="font-size:.8rem">All blocks are SHA-256 hashed with proof-of-work (difficulty: 2 leading zeros). Tampering with any block invalidates the entire chain.</div>
+</div>
+{% endblock %}

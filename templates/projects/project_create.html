@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Create Project — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header"><h1>Create New Project</h1><p>Set up a new government project for AI monitoring</p></div>
+<div class="card" style="max-width:720px">
+  <form method="post">
+    {% csrf_token %}
+    <div class="grid grid-2" style="gap:1rem;margin-bottom:1rem">
+      <div class="form-group" style="grid-column:1/-1"><label>Project Title</label><input name="title" class="form-control" required placeholder="e.g. Abuja-Kaduna Expressway Phase 2"></div>
+      <div class="form-group"><label>Project Type</label><select name="project_type" class="form-control" required>{% for val, label in project_types %}<option value="{{ val }}">{{ label }}</option>{% endfor %}</select></div>
+      <div class="form-group"><label>Contractor</label><select name="contractor" class="form-control" required>{% for c in contractors %}<option value="{{ c.pk }}">{{ c.company }} ({{ c.name }})</option>{% endfor %}</select></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Description</label><textarea name="description" class="form-control" rows="3" placeholder="Project scope and objectives..."></textarea></div>
+      <div class="form-group" style="grid-column:1/-1"><label>Location Name</label><input name="location_name" class="form-control" required placeholder="e.g. Garki, Abuja FCT"></div>
+      <div class="form-group"><label>Latitude</label><input name="latitude" type="number" step="any" class="form-control" required placeholder="9.0765"></div>
+      <div class="form-group"><label>Longitude</label><input name="longitude" type="number" step="any" class="form-control" required placeholder="7.3986"></div>
+      <div class="form-group"><label>Total Budget (NGN)</label><input name="total_budget" type="number" step="0.01" class="form-control" required placeholder="500000000"></div>
+      <div class="form-group"><label>Start Date</label><input name="start_date" type="date" class="form-control" required></div>
+      <div class="form-group"><label>Expected End Date</label><input name="expected_end_date" type="date" class="form-control" required></div>
+    </div>
+    <div style="display:flex;gap:.75rem">
+      <button type="submit" class="btn btn-primary">Create Project + Milestones</button>
+      <a href="{% url 'project_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+    <div class="text-muted mt-2" style="font-size:.8rem">Standard payment milestones will be auto-created: Foundation (25%), Structure (50%), Roofing (70%), Finishing (90%), Complete (100%)</div>
+  </form>
+</div>
+{% endblock %}

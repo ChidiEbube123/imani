@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}Payments — GovTrust{% endblock %}
+{% block content %}
+<div class="page-header flex-between"><div><h1>Payment Queue</h1><p>AI-triggered milestone payments awaiting approval</p></div></div>
+<div class="card">
+  <div class="table-wrap"><table>
+    <thead><tr><th>Reference</th><th>Project</th><th>Contractor</th><th>Amount</th><th>Completion at Trigger</th><th>Status</th><th>Blockchain TX</th><th>Date</th><th></th></tr></thead>
+    <tbody>
+      {% for p in payments %}
+      <tr>
+        <td class="mono" style="font-size:.78rem">{{ p.reference }}</td>
+        <td><strong>{{ p.project.title }}</strong></td>
+        <td>{{ p.project.contractor.company }}</td>
+        <td class="mono" style="font-weight:600">N{{ p.amount|floatformat:2 }}</td>
+        <td>
+          <div class="progress-wrap" style="width:80px;display:inline-block;vertical-align:middle;margin-right:.5rem"><div class="progress-bar green" style="width:{{ p.completion_at_trigger }}%"></div></div>
+          <span class="mono" style="font-size:.8rem">{{ p.completion_at_trigger|floatformat:1 }}%</span>
+        </td>
+        <td>{% if p.status == 'released' %}<span class="badge badge-green">Released</span>{% elif p.status == 'pending' %}<span class="badge badge-yellow">Pending Approval</span>{% elif p.status == 'approved' %}<span class="badge badge-blue">Approved</span>{% else %}<span class="badge badge-red">{{ p.status }}</span>{% endif %}</td>
+        <td class="mono" style="font-size:.72rem;color:var(--success)">{% if p.blockchain_tx_hash %}{{ p.blockchain_tx_hash|slice:":16" }}...{% else %}&mdash;{% endif %}</td>
+        <td class="text-muted" style="font-size:.8rem">{{ p.created_at|date:"M d" }}</td>
+        <td><a href="{% url 'payment_detail' p.pk %}" class="btn btn-secondary btn-sm">Review</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:3rem">No payments yet. Upload evidence to trigger milestone payments.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+{% endblock %}

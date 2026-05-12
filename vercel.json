@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "govtrust_mvp_v2/wsgi.py",
+      "src": "govtrust/wsgi.py",
       "use": "@vercel/python",
       "config": {  "maxLambdaSize": "250mb", "runtime": "python3.9" }
     },
@@ -21,7 +21,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "govtrust_mvp_v2/wsgi.py"
+      "dest": "govtrust/wsgi.py"
       
     }
   ]

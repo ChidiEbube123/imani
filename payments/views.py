@@ -2,6 +2,8 @@ import uuid
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib import messages
+from decimal import Decimal
+
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -62,7 +64,9 @@ def approve_payment(request, pk):
 
 def _create_milestone_payment(project, milestone, snapshot):
     """Called automatically when a milestone is achieved."""
-    amount = (milestone.payment_percentage / 100) * project.total_budget
+    # Convert the calculation to Decimal to match project.total_budget
+    percentage_factor = Decimal(str(milestone.payment_percentage)) / Decimal('100')
+    amount = percentage_factor * project.total_budget
     reference = f"PAY-{project.id}-{milestone.id}-{uuid.uuid4().hex[:8].upper()}"
     payment = Payment.objects.create(
         project=project,
